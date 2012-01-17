@@ -26,6 +26,10 @@ test('API', function(t) {
   t.end()
 })
 
+test('Basic parsing', function(t) {
+  t.end()
+})
+
 function message(newline) {
   return [ 'Date: Tue, 17 Jan 2012 03:01:04 GMT'
          , 'Subject: The subject'
