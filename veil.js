@@ -22,6 +22,7 @@ defaultable.def(module,
   , 'breaks' : /\r?\n/
   , 'newline': "\n"
   , 'join'   : true
+  , 'body_key': 'body'
   , 'header_re': /^(.*?): +(.*)$/
   }, function(module, exports, DEFS, require) {
 
@@ -34,15 +35,15 @@ function parse(message) {
 
   var result = message.split(DEFS.breaks).reduce(line, {})
   if(DEFS.join)
-    result.body = result.body.join(DEFS.newline)
+    result[DEFS.body_key] = result[DEFS.body_key].join(DEFS.newline)
   return result
 }
 
 function line(message, line) {
-  if('body' in message)
+  if(DEFS.body_key in message)
     body(message, line)
   else if(line.length === 0)
-    message.body = []
+    message[DEFS.body_key] = []
   else
     header(message, line)
 
@@ -50,15 +51,34 @@ function line(message, line) {
 }
 
 function body(message, line) {
-  message.body.push(line)
+  message[DEFS.body_key].push(line)
 }
 
 function header(message, line) {
   var match = line.match(DEFS.header_re)
-  if(!match || typeof match[1] != 'string' || typeof match[2] != 'string')
+    , key = match && match[1]
+    , val = match && match[2]
+
+  if(typeof key != 'string' || typeof val != 'string')
     throw new Error('Bad header line: ' + JSON.stringify(line))
 
-  message[match[1]] = match[2]
+  if(DEFS.keys === 'underscore')
+    key = key.toLowerCase().replace(/[^\w+]/g, '_')
+
+  var new_val
+  if(DEFS.dates) {
+    new_val = new Date(val)
+    if(! isNaN(new_val.getTime()))
+      val = new_val
+  }
+
+  if(DEFS.numbers && typeof val == 'string') {
+    new_val = +val
+    if(! isNaN(new_val))
+      val = new_val
+  }
+
+  message[key] = val
 }
 
 }) // defaultable
