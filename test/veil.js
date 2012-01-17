@@ -43,6 +43,28 @@ test('API', function(t) {
   t.end()
 })
 
+test('Basic parsing', function(t) {
+  var veil = require('../veil')
+
+  ; ['\n', '\r\n'].forEach(function(NL) {
+    var msg = veil.parse(message(NL))
+
+    t.type(msg, 'object', 'Parsed message object')
+
+    t.equal(Object.keys(msg).length, 7, 'Correct key count')
+    t.equal(msg['Date'], 'Tue, 17 Jan 2012 03:01:04 GMT', 'Good value: Date')
+    t.equal(msg['Subject'], 'The subject', 'Good value: Subject')
+    t.equal(msg['Content-Type'], 'text/plain; charset=utf8', 'Good value: Content-Type')
+    t.equal(msg['X-CouchDB-Stuff'], 'CouchDB stuff', 'Good value: X-CouchDB-Stuff')
+    t.equal(msg['Number'], '123', 'Good value: Number')
+    t.equal(msg['Negative'], '-123', 'Good value: Negative')
+
+    t.equal(msg['body'], 'Body line 1\nline 2\n\nLine 4', 'Good value: body')
+  })
+
+  t.end()
+})
+
 function message(newline) {
   return [ 'Date: Tue, 17 Jan 2012 03:01:04 GMT'
          , 'Subject: The subject'

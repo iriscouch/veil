@@ -16,24 +16,49 @@
 
 var defaultable = require('defaultable')
 defaultable.def(module,
-  { 'keys': null
-  , 'dates': false
+  { 'keys'   : null
+  , 'dates'  : false
   , 'numbers': false
   , 'breaks' : /\r?\n/
+  , 'newline': "\n"
+  , 'join'   : true
+  , 'header_re': /^(.*?): +(.*)$/
   }, function(module, exports, DEFS, require) {
 
 exports.parse = parse
 
 var assert = require('assert')
 
-function parse(message, opts) {
+function parse(message) {
   assert.equal(typeof message, 'string', 'Must provide message as a string')
 
-  if(typeof opts != 'object' || Array.isArray(opts))
-    opts = {}
-  opts = defaultable.merge(opts, DEFS)
+  var result = message.split(DEFS.breaks).reduce(line, {})
+  if(DEFS.join)
+    result.body = result.body.join(DEFS.newline)
+  return result
+}
 
-  return {}
+function line(message, line) {
+  if('body' in message)
+    body(message, line)
+  else if(line.length === 0)
+    message.body = []
+  else
+    header(message, line)
+
+  return message
+}
+
+function body(message, line) {
+  message.body.push(line)
+}
+
+function header(message, line) {
+  var match = line.match(DEFS.header_re)
+  if(!match || typeof match[1] != 'string' || typeof match[2] != 'string')
+    throw new Error('Bad header line: ' + JSON.stringify(line))
+
+  message[match[1]] = match[2]
 }
 
 }) // defaultable
