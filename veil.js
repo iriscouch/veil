@@ -66,7 +66,7 @@ function header(message, line) {
     key = key.toLowerCase().replace(/[^\w+]/g, '_')
 
   var new_val
-  if(DEFS.dates) {
+  if(DEFS.dates && typeof val == 'string' && !val.match(/^\s*-?\d+\.?\d*\s*$/)) {
     new_val = new Date(val)
     if(! isNaN(new_val.getTime()))
       val = new_val

@@ -89,6 +89,8 @@ test('Parsing options', function(t) {
   t.notEqual(typeof msg['Date'], 'string', 'Parsed the date')
   t.type(msg['Date'].getUTCSeconds, 'function', 'Date looks like a date object')
   t.equal(JSON.stringify(msg['Date']), '"2012-01-17T03:01:04.000Z"', 'Date converts to the right JSON')
+  t.equal(msg.Number, '123', 'Completely numeric values do not convert to Date')
+  t.equal(msg.Negative, '-123.45', 'Negative numeric values do not convert to Date')
 
   parse({'numbers':true})
   t.type(msg.Number, 'number', 'Header "Number" converted to number')
