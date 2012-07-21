@@ -24,6 +24,7 @@ defaultable.def(module,
   , 'join'   : true
   , 'body_key': 'body'
   , 'header_re': /^(.*?): +(.*)$/
+  , 'continued_header_re': /^(\s.+)$/
   }, function(module, exports, DEFS, require) {
 
 exports.parse = parse
@@ -54,13 +55,23 @@ function body(message, line) {
   message[DEFS.body_key].push(line)
 }
 
+var last_key = null;
+
 function header(message, line) {
   var match = line.match(DEFS.header_re)
     , key = match && match[1]
     , val = match && match[2]
+    , append = false;
 
-  if(typeof key != 'string' || typeof val != 'string')
-    throw new Error('Bad header line: ' + JSON.stringify(line))
+  if(typeof key != 'string' || typeof val != 'string') {
+    if(last_key && (match = line.match(DEFS.continued_header_re))) {
+      key = last_key;
+      val = match[1];
+      append = true;
+    }
+    else
+      throw new Error('Bad header line: ' + JSON.stringify(line))
+  }
 
   if(DEFS.keys === 'underscore')
     key = key.toLowerCase().replace(/[^\w+]/g, '_')
@@ -78,7 +89,12 @@ function header(message, line) {
       val = new_val
   }
 
-  message[key] = val
+  if(append) {
+    message[key] += val;
+  } else {
+    message[key] = val
+    last_key = key;
+  }
 }
 
 }) // defaultable
