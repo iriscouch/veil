@@ -51,7 +51,7 @@ test('Basic parsing', function(t) {
 
     t.type(msg, 'object', 'Parsed message object')
 
-    t.equal(Object.keys(msg).length, 7, 'Correct key count')
+    t.equal(Object.keys(msg).length, 8, 'Correct key count')
     t.equal(msg['Date'], 'Tue, 17 Jan 2012 03:01:04 GMT', 'Good value: Date')
     t.equal(msg['Subject'], 'The subject', 'Good value: Subject')
     t.equal(msg['Content-Type'], 'text/plain; charset=utf8', 'Good value: Content-Type')
@@ -77,7 +77,7 @@ test('Parsing options', function(t) {
   }
 
   parse({'keys':'underscore'})
-  t.equal(Object.keys(msg).length, 7, 'Same key count as before')
+  t.equal(Object.keys(msg).length, 8, 'Same key count as before')
   t.ok('date' in msg, 'Converted key: date')
   t.ok('subject' in msg, 'Converted key: subject')
   t.ok('content_type' in msg, 'Converted key: content_type')
@@ -116,6 +116,8 @@ function message(newline) {
          , 'X-CouchDB-Stuff: CouchDB stuff'
          , 'Number: 123'
          , 'Negative: -123.45'
+         , 'Received: at some point in time, by various hosts, which make this line exceed'
+         , ' to more than 78 characters and hence require it to be folded in two'
          , ''
          , 'Body line 1'
          , 'Date: Tue, 17 Jan 2012 03:01:04 GMT' // Not a header line
